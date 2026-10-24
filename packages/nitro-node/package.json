@@ -8,10 +8,12 @@
   },
   "type": "module",
   "main": "index.js",
-  "exports": "./index.js",
+  "exports": {
+    ".": "./index.js",
+    "./build": "./scripts/build.js"
+  },
   "scripts": {
     "build": "node scripts/build.js",
-    "hello": "node examples/hello.js",
     "test": "node --expose-gc --test test/*.test.js",
     "typecheck": "tsc --noEmit"
   },

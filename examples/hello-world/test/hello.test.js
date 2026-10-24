@@ -3,7 +3,9 @@ import { once } from "node:events";
 import { setImmediate } from "node:timers/promises";
 import { Worker } from "node:worker_threads";
 import { test } from "node:test";
-import { jsiHello, NitroModulesProxy } from "../index.js";
+import { fileURLToPath } from "node:url";
+import { loadAddon, NitroModulesProxy } from "nitro-node";
+import { jsiHello } from "../index.js";
 
 test("JSI installs a callable native function into the actual Node global", () => {
   assert.equal(global.jsiHello, jsiHello);
@@ -14,10 +16,17 @@ test("JSI installs a callable native function into the actual Node global", () =
 
 test("dynamic and package imports reuse the installed native bindings", async () => {
   const direct = await import("../index.js");
-  const packaged = await import("nitro-node");
+  const packaged = await import("hello-world");
   assert.equal(direct, packaged);
   assert.equal(direct.jsiHello, jsiHello);
-  assert.equal(direct.NitroModulesProxy, NitroModulesProxy);
+  const host = await import("nitro-node");
+  assert.equal(host.NitroModulesProxy, NitroModulesProxy);
+});
+
+test("loading the example addon again reuses its bindings", () => {
+  const url = new URL("../build/hello_world.node", import.meta.url);
+  assert.equal(loadAddon(url), loadAddon(fileURLToPath(url)));
+  assert.equal(globalThis.jsiHello, jsiHello);
 });
 
 test("Nitro installs its real proxy and registers a constructible HybridClass", () => {

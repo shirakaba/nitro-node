@@ -1,7 +1,5 @@
 #include <node_api.h>
 #include "NodeApiJsiRuntime.h"
-#include "HelloWorld.hpp"
-#include <NitroModules/HybridClassRegistry.hpp>
 #include <NitroModules/InstallNitro.hpp>
 #include <memory>
 #include <stdexcept>
@@ -33,28 +31,21 @@ napi_value initialize(napi_env env, napi_value exports) {
   try {
     auto state = std::make_unique<AddonState>(env);
     auto& runtime = *state->runtime;
-    auto hello = jsi::Function::createFromHostFunction(
-        runtime, jsi::PropNameID::forAscii(runtime, "jsiHello"), 1,
-        [](jsi::Runtime& rt, const jsi::Value&, const jsi::Value* args, size_t count) -> jsi::Value {
-          if (count != 1 || !args[0].isString()) {
-            throw jsi::JSError(rt, "jsiHello expects one string argument");
-          }
-          return jsi::String::createFromUtf8(rt, "Hello, " + args[0].asString(rt).utf8(rt) + "! From JSI on Node.js.");
-        });
-    runtime.global().setProperty(runtime, "jsiHello", hello);
-
-    margelo::nitro::HybridClassRegistry::registerHybridClass("HelloWorld", HelloWorld::Class::get());
     margelo::nitro::install(runtime);
 
-    // Both APIs are installed through JSI into the real Node global object.
+    // User addons receive this opaque runtime handle through loadAddon().
+    napi_value runtimeHandle;
+    if (napi_create_external(env, &runtime, nullptr, nullptr, &runtimeHandle) != napi_ok ||
+        napi_set_named_property(env, exports, "runtimeHandle", runtimeHandle) != napi_ok) {
+      throw std::runtime_error("Cannot export JSI runtime handle");
+    }
+
     napi_value global;
     if (napi_get_global(env, &global) != napi_ok) throw std::runtime_error("Cannot access Node global");
-    for (const char* name : {"jsiHello", "NitroModulesProxy"}) {
-      napi_value value;
-      if (napi_get_named_property(env, global, name, &value) != napi_ok ||
-          napi_set_named_property(env, exports, name, value) != napi_ok) {
-        throw std::runtime_error("Cannot export installed JSI bindings");
-      }
+    napi_value proxy;
+    if (napi_get_named_property(env, global, "NitroModulesProxy", &proxy) != napi_ok ||
+        napi_set_named_property(env, exports, "NitroModulesProxy", proxy) != napi_ok) {
+      throw std::runtime_error("Cannot export installed Nitro bindings");
     }
     if (napi_add_env_cleanup_hook(env, [](void* data) { delete static_cast<AddonState*>(data); }, state.get()) != napi_ok) {
       throw std::runtime_error("Cannot register JSI runtime cleanup");

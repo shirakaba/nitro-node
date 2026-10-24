@@ -27,15 +27,34 @@ function run(args) {
   if (result.status !== 0) process.exit(result.status ?? 1);
 }
 
-const buildDir = join(packageDir, "build");
-run([
-  "-S",
-  packageDir,
-  "-B",
-  buildDir,
-  `-DCMAKE_BUILD_TYPE=${process.env.BUILD_TYPE ?? "Release"}`,
-  `-DNODE_INCLUDE_DIR=${nodeIncludeDir}`,
-  `-DJSI_DIR=${join(reactNativeDir, "ReactCommon/jsi")}`,
-  `-DNITRO_DIR=${nitroDir}`,
-]);
-run(["--build", buildDir, "--parallel"]);
+function buildProject(sourceDir, definitions) {
+  const buildDir = join(sourceDir, "build");
+  run([
+    "-S",
+    sourceDir,
+    "-B",
+    buildDir,
+    `-DCMAKE_BUILD_TYPE=${process.env.BUILD_TYPE ?? "Release"}`,
+    ...definitions,
+  ]);
+  run(["--build", buildDir, "--parallel"]);
+}
+
+export function buildRuntime() {
+  buildProject(packageDir, [
+    `-DNODE_INCLUDE_DIR=${nodeIncludeDir}`,
+    `-DJSI_DIR=${join(reactNativeDir, "ReactCommon/jsi")}`,
+    `-DNITRO_DIR=${nitroDir}`,
+  ]);
+}
+
+/** Build a user workspace against the host's shared native runtime. */
+export function buildAddon(source) {
+  buildRuntime();
+  const sourceDir = source instanceof URL ? fileURLToPath(source) : resolve(source);
+  buildProject(sourceDir, [`-DNitroNode_DIR=${join(packageDir, "build")}`]);
+}
+
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  buildRuntime();
+}
