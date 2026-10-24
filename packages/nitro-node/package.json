@@ -1,0 +1,16 @@
+{
+  "name": "nitro-node",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "react-native-nitro-modules": "1.0.0-alpha.nightly.100.g107f6fc66597"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "@typescript/native": "catalog:",
+    "typescript": "catalog:"
+  }
+}
