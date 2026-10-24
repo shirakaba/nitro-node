@@ -1,0 +1,9 @@
+packages:
+  - packages/*
+
+catalog:
+  "@types/node": ^24.13.6
+  # Places the npm package `typescript`, which provides `tsc` v7,
+  # into node_modules/@typescript/native. We can call this for all typechecking.
+  "@typescript/native": npm:typescript@^7.0.2
+  typescript: npm:@typescript/typescript6@^6.0.2

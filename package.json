@@ -1,0 +1,25 @@
+{
+  "name": "monorepo",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "prepare": "husky",
+    "lint-staged": "lint-staged",
+    "format": "oxfmt --write .",
+    "lint": "oxlint"
+  },
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^17.6.0",
+    "oxfmt": "^0.74.0",
+    "oxlint": "^1.89.0"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx,mjs,cjs,mts,cts}": [
+      "oxlint --fix --no-error-on-unmatched-pattern",
+      "oxfmt --write --no-error-on-unmatched-pattern"
+    ],
+    "!(*.{js,jsx,ts,tsx,mjs,cjs,mts,cts})": "oxfmt --write --no-error-on-unmatched-pattern"
+  },
+  "packageManager": "pnpm@12.15.0"
+}

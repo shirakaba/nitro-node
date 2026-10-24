@@ -1,0 +1,17 @@
+{
+  "oxc.enable.oxfmt": true,
+  "oxc.enable.oxlint": true,
+  "eslint.enable": false,
+  "prettier.enable": false,
+  "biome.enabled": false,
+  "editor.defaultFormatter": "oxc.oxc-vscode",
+  "editor.codeActionsOnSave": ["source.format.oxc", "source.fixAll.oxc"],
+
+  "oxc.fixKind": "all",
+  "tailwindCSS.classFunctions": ["cva", "tv", "twJoin", "twMerge"],
+  "tailwindCSS.lint.suggestCanonicalClasses": "ignore",
+  "debug.javascript.terminalOptions": {
+    "skipFiles": ["<node_internals>/**", "**/node_modules/**"]
+  },
+  "js/ts.experimental.useTsgo": true
+}
