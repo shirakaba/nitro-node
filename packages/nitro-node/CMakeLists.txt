@@ -62,6 +62,9 @@ target_include_directories(nitro_node_runtime PUBLIC
   "${NITRO_DIR}/apple/core/include"
   "${CMAKE_CURRENT_SOURCE_DIR}/include"
   PRIVATE
+  # Only Microsoft's js_runtime_api.h is vendored here. Standard Node-API
+  # headers are supplied by cmake-js (and its dependency on node-api-headers)
+  # through CMAKE_JS_INC above.
   "${NODE_API_JSI_DIR}/node-api"
   "${NODE_API_JSI_DIR}/src"
 )
