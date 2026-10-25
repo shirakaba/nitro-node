@@ -1,0 +1,51 @@
+{
+  "expo": {
+    "name": "NitroDemo",
+    "slug": "NitroDemo",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "uk.co.birchlabs.nitro-demo",
+      "infoPlist": {
+        "CFBundleName": "Nitro Demo"
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "edgeToEdgeEnabled": true,
+      "predictiveBackGestureEnabled": false,
+      "package": "uk.co.birchlabs.nitro_demo"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "windows": {
+      "displayName": "Nitro Demo",
+      "namespace": "uk.co.birchlabs.nitrodemo",
+      "packageGuid": "0e172a35-7631-4f7c-91e4-bb3e90afd1c1",
+      "projectGuid": "26f570cc-068b-4252-8cc0-028dc09748bb"
+    },
+    "macos": {
+      "bundleIdentifier": "uk.co.birchlabs.nitro-demo",
+      "infoPlist": {
+        "CFBundleName": "Nitro Demo"
+      }
+    },
+    "experiments": {
+      "outOfTreePlatforms": true
+    },
+    "platforms": ["ios", "android", "macos", "windows"]
+  }
+}

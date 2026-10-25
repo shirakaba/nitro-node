@@ -1,0 +1,54 @@
+{
+  "name": "nitrodemo",
+  "version": "1.0.0",
+  "private": true,
+  "homepage": "https://github.com/shirakaba/expo-desktop/tree/main/templates/blank-typescript",
+  "main": "index.ts",
+  "scripts": {
+    "postinstall": "patch-package",
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "macos": "node -e \"console.log('Please run \\`node --run prebuild\\` to set up the React Native macOS project.'); process.exit(1);\"",
+    "windows": "node -e \"console.log('Please run \\`node --run prebuild\\` to set up the React Native Windows project.'); process.exit(1);\"",
+    "prebuild": "expo-desktop prebuild",
+    "autolink-windows": "react-native autolink-windows",
+    "web": "expo start --web"
+  },
+  "dependencies": {
+    "expo": "~55.0.31",
+    "expo-desktop": "^1.0.6",
+    "expo-desktop-modules-core": "~55.0.2",
+    "expo-desktop-stubs": "~55.0.2",
+    "expo-status-bar": "~55.0.6",
+    "react": "19.2.0",
+    "react-native": "0.83.10",
+    "react-native-macos": "0.83.0",
+    "react-native-windows": "0.83.2"
+  },
+  "devDependencies": {
+    "@react-native-windows/find-dotnet-tools": "0.0.0-canary.3",
+    "@types/react": "~19.2.17",
+    "expo-desktop-metro-config": "~55.83.3",
+    "expo-desktop-template-bare-minimum": "~55.83.10",
+    "patch-package": "^8.0.1",
+    "typescript": "~5.9.2"
+  },
+  "overrides": {
+    "react": "19.2.0",
+    "react-native": "0.83.10"
+  },
+  "expo": {
+    "autolinking": {
+      "exclude": [
+        "react-native-windows"
+      ]
+    },
+    "install": {
+      "exclude": [
+        "react",
+        "react-native"
+      ]
+    }
+  }
+}
