@@ -197,7 +197,7 @@ importers:
         specifier: ^1.89.0
         version: 1.89.0
 
-  demos/hello-world:
+  demos/node:
     dependencies:
       example-hello-world:
         specifier: workspace:*

@@ -8,7 +8,7 @@ Working: the `nitro-node` library wraps Node's existing JavaScript environment w
 | -------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
 | [`packages/nitro-node`](packages/nitro-node)                   | Node-API/JSI runtime, lifetime management, Nitro installation, generic native addon loading, shared native library, and CMake SDK. |
 | [`packages/example-hello-world`](packages/example-hello-world) | The `HelloWorld` class, its registration, the `jsiHello` function, explicit module initialization, declarations, and module tests. |
-| [`demos/hello-world`](demos/hello-world)                       | The consumer application, which initializes the module and prints its output.                                                      |
+| [`demos/node`](demos/node)                                     | The consumer Node.js app, which initializes the module and prints its output.                                                      |
 
 `nitro-node` exports `init()` and `loadAddon()`. Its `init()` synchronously installs Nitro's built-in classes and returns the populated `NitroModulesProxy`; repeated calls return the same proxy. `example-hello-world` exports its own idempotent `init()`, which initializes the host, loads its native addon, and returns `{ HelloWorld, jsiHello }`. Both libraries are marked `"sideEffects": false`: importing either loads no native code and installs no globals. The demo calls the example module's initializer explicitly. Both native addons link the host's shared runtime, keeping a single class registry and JSI implementation.
 

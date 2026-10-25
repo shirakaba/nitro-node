@@ -1,4 +1,4 @@
-# Hello World demo
+# Hello World demo on Node.js
 
 This workspace consumes `example-hello-world`. It contains the application entry point and its JavaScript type-checking configuration; the native implementation and module tests live in [`packages/example-hello-world`](../../packages/example-hello-world).
 
