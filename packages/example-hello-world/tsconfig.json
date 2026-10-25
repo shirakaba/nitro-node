@@ -4,5 +4,6 @@
     "noEmit": true,
     "checkJs": true
   },
-  "include": ["**/*.js", "**/*.d.ts"]
+  "include": ["**/*.js", "**/*.d.ts"],
+  "exclude": ["addon.native.js"]
 }

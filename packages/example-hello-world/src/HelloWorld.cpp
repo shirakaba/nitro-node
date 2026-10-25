@@ -16,7 +16,7 @@ std::shared_ptr<HelloWorld> HelloWorld::create() {
 }
 
 std::string HelloWorld::greet(const std::string& name) {
-  return "Hello, " + name + "! From Nitro v1 on Node.js.";
+  return "Hello, " + name + "! From Nitro v1.";
 }
 
 const std::shared_ptr<const HybridClass>& HelloWorld::getHybridClass() {

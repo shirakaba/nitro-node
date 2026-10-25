@@ -3,13 +3,16 @@
 This workspace owns the example Nitro module and depends on `nitro-node` through `workspace:*`. Importing it loads no native code and installs no globals. It is marked `"sideEffects": false`.
 
 - `src/HelloWorld.hpp` and `src/HelloWorld.cpp` define the Nitro HybridObject and its `greet` method.
-- `src/addon.cpp` registers that class and installs the plain JSI `jsiHello` function.
+- `src/HelloWorldBindings.cpp` registers that class and installs the plain JSI `jsiHello` function.
+- `src/addon.cpp` connects those bindings to the Node host.
+- `apple/ExampleHelloWorld.mm` connects the same bindings to React Native on iOS and macOS.
+- `ExampleHelloWorld.podspec` builds the Apple host and shared bindings against NitroCore.
 - `CMakeLists.txt` builds `hello_world.node` against the host's shared runtime.
 - `addon.js` exports an explicit, idempotent `init()` function.
 - `addon.d.ts` describes the returned bindings and the module's optional `jsiHello` global.
 - `test/` tests the module's behavior, including deferred initialization and Workers.
 
-The consumer application lives in [`demos/hello-world`](../../demos/hello-world).
+The consumer applications live in [`demos/node`](../../demos/node) and [`demos/react-native`](../../demos/react-native).
 
 From the repository root:
 
@@ -34,3 +37,5 @@ console.log(new HelloWorld().greet("World"));
 ```
 
 `init()` initializes the host, loads this module's native addon, and returns the same bindings object on repeated calls. Native globals are created during initialization. Each Worker initializes its own bindings.
+
+The `react-native` conditional export selects `addon.native.js`. Its explicit `init()` requests the small `ExampleHelloWorld` TurboModule, whose JSI hook installs the unchanged Nitro core and the shared bindings into Hermes. The public `HelloWorld` type comes from `nitro-core`; the React Native entry does not import the Node host. The current native integration covers C++ modules on iOS and macOS, not Nitro's Swift bridge or views.

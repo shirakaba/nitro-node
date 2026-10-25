@@ -46,6 +46,7 @@
     "experiments": {
       "outOfTreePlatforms": true
     },
+    "plugins": ["./plugins/with-hermes-88.cjs"],
     "platforms": ["ios", "android", "macos", "windows"]
   }
 }

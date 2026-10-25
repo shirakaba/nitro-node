@@ -15,6 +15,7 @@
     "web": "expo start --web"
   },
   "dependencies": {
+    "example-hello-world": "workspace:*",
     "expo": "~55.0.31",
     "expo-desktop": "^1.0.6",
     "expo-desktop-modules-core": "~55.0.2",

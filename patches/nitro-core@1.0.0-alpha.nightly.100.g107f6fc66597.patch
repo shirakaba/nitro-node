@@ -1,0 +1,49 @@
+diff --git a/NitroCore.podspec b/NitroCore.podspec
+new file mode 100644
+index 0000000000000000000000000000000000000000..368fe8e00f5f42b4f19e4975d2d42e4cb83c040e
+--- /dev/null
++++ b/NitroCore.podspec
+@@ -0,0 +1,29 @@
++require 'json'
++package = JSON.parse(File.read(File.join(__dir__, 'package.json')))
++
++# CocoaPods host for the unchanged C++ core. The RN adapter in this nightly
++# instead uses RN 0.88's SwiftPM build integration.
++Pod::Spec.new do |s|
++  s.name = 'NitroCore'
++  s.version = package['version']
++  s.summary = package['description']
++  s.homepage = package['homepage']
++  s.license = package['license']
++  s.author = package['author']
++  s.source = { :git => 'https://github.com/margelo/nitro.git', :tag => "v#{s.version}" }
++  s.platforms = { :ios => '15.1', :osx => '14.0' }
++  s.pod_target_xcconfig = {
++    'CLANG_CXX_LANGUAGE_STANDARD' => 'c++20',
++    'OTHER_CPLUSPLUSFLAGS' => '$(inherited) -fblocks -DNITRO_JSI_HAS_FAST_UTF16=0'
++  }
++  s.dependency 'React-jsi'
++  s.subspec 'Cxx' do |ss|
++    ss.source_files = 'native/cpp/src/*.cpp', 'native/cpp/include/**/*.h', 'native/cpp/include/**/*.hpp'
++    ss.header_mappings_dir = 'native/cpp/include'
++  end
++  s.subspec 'AppleCxx' do |ss|
++    ss.dependency 'NitroCore/Cxx'
++    ss.source_files = 'native/apple/src/*.cpp', 'native/apple/include/**/*.h', 'native/apple/include/**/*.hpp'
++    ss.header_mappings_dir = 'native/apple/include'
++  end
++end
+diff --git a/package.json b/package.json
+index b81a1ccaa567d7b583a0c93116740cd2d6a649fc..03758d99c52d29677f0c532f26a34166571241d9 100644
+--- a/package.json
++++ b/package.json
+@@ -34,7 +34,8 @@
+     "js/lib/typescript/commonjs",
+     "js/lib/typescript/module",
+     "README.md",
+-    "LICENSE"
++    "LICENSE",
++    "NitroCore.podspec"
+   ],
+   "repository": {
+     "type": "git",

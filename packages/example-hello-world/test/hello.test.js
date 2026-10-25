@@ -33,7 +33,7 @@ test("init is idempotent and returns the installed native bindings", (t) => {
 test("JSI installs a callable native function into the actual Node global", () => {
   const { jsiHello } = init();
   assert.equal(global.jsiHello, jsiHello);
-  assert.equal(jsiHello("macOS"), "Hello, macOS! From JSI on Node.js.");
+  assert.equal(jsiHello("macOS"), "Hello, macOS! From JSI.");
   // @ts-expect-error Deliberately pass an invalid argument.
   assert.throws(() => jsiHello(42), /jsiHello expects one string argument/);
   // @ts-expect-error Deliberately omit an argument.
@@ -64,7 +64,7 @@ test("Nitro installs its real proxy and registers a constructible HybridClass", 
   assert.ok(NitroModulesProxy.getAllHybridClassNames().includes("HelloWorld"));
   assert.equal(NitroModulesProxy.getHybridClass("HelloWorld"), HelloWorld);
   const hello = new HelloWorld();
-  assert.equal(hello.greet("Node.js"), "Hello, Node.js! From Nitro v1 on Node.js.");
+  assert.equal(hello.greet("Node.js"), "Hello, Node.js! From Nitro v1.");
   assert.equal(hello.toString(), "[HybridObject HelloWorld]");
   assert.ok(hello instanceof HelloWorld);
   assert.equal(NitroModulesProxy.hasNativeState(hello), true);
@@ -76,8 +76,8 @@ test("strings cross Node-API, JSI, and Nitro with Unicode and embedded NULs", ()
   const { HelloWorld, jsiHello } = init();
   const hello = new HelloWorld();
   for (const name of ["", "世界 🌏", "a\0b", "é e\u0301"]) {
-    assert.equal(jsiHello(name), `Hello, ${name}! From JSI on Node.js.`);
-    assert.equal(hello.greet(name), `Hello, ${name}! From Nitro v1 on Node.js.`);
+    assert.equal(jsiHello(name), `Hello, ${name}! From JSI.`);
+    assert.equal(hello.greet(name), `Hello, ${name}! From Nitro v1.`);
   }
 });
 
@@ -90,7 +90,7 @@ test("Nitro errors propagate back to JavaScript and subsequent calls work", () =
   // @ts-expect-error Deliberately omit an argument.
   assert.throws(() => hello.greet());
   assert.throws(() => NitroModulesProxy.getHybridClass("MissingClass"), /not registered/);
-  assert.equal(hello.greet("again"), "Hello, again! From Nitro v1 on Node.js.");
+  assert.equal(hello.greet("again"), "Hello, again! From Nitro v1.");
 });
 
 test("Nitro dispose removes native state and rejects further method calls", () => {
@@ -110,8 +110,8 @@ test("bindings survive addon initialization, event loop turns, and garbage colle
     for (let i = 0; i < 500; i++) new HelloWorld().greet("temporary");
     global.gc();
     await setImmediate();
-    assert.equal(jsiHello("later"), "Hello, later! From JSI on Node.js.");
-    assert.equal(hello.greet("later"), "Hello, later! From Nitro v1 on Node.js.");
+    assert.equal(jsiHello("later"), "Hello, later! From JSI.");
+    assert.equal(hello.greet("later"), "Hello, later! From Nitro v1.");
   }
 });
 
@@ -125,13 +125,10 @@ test("Workers get independent runtimes and exit cleanly", async () => {
       });
       const exit = once(worker, "exit");
       const [message] = await once(worker, "message");
-      assert.deepEqual(message, [
-        "Hello, Worker! From JSI on Node.js.",
-        "Hello, Worker! From Nitro v1 on Node.js.",
-      ]);
+      assert.deepEqual(message, ["Hello, Worker! From JSI.", "Hello, Worker! From Nitro v1."]);
       const [code] = await exit;
       assert.equal(code, 0);
     }),
   );
-  assert.equal(jsiHello("main"), "Hello, main! From JSI on Node.js.");
+  assert.equal(jsiHello("main"), "Hello, main! From JSI.");
 });

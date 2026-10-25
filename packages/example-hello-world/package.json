@@ -11,12 +11,22 @@
     "addon.js",
     "addon.d.ts",
     "CMakeLists.txt",
-    "src"
+    "src",
+    "addon.native.js",
+    "apple",
+    "ExampleHelloWorld.podspec"
   ],
   "type": "module",
   "sideEffects": false,
   "types": "./addon.d.ts",
-  "exports": "./addon.js",
+  "react-native": "./addon.native.js",
+  "exports": {
+    ".": {
+      "types": "./addon.d.ts",
+      "react-native": "./addon.native.js",
+      "default": "./addon.js"
+    }
+  },
   "scripts": {
     "build": "cmake-js compile",
     "install": "node --run build",
@@ -25,11 +35,20 @@
   },
   "dependencies": {
     "cmake-js": "catalog:",
+    "nitro-core": "1.0.0-alpha.nightly.100.g107f6fc66597",
     "nitro-node": "workspace:*"
   },
   "devDependencies": {
     "@tsconfig/node24": "catalog:",
     "@types/node": "catalog:",
     "@typescript/native": "catalog:"
+  },
+  "peerDependencies": {
+    "react-native": ">=0.83.0"
+  },
+  "peerDependenciesMeta": {
+    "react-native": {
+      "optional": true
+    }
   }
 }

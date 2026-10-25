@@ -20,4 +20,8 @@ minimumReleaseAgeExclude:
 nodeLinker: hoisted
 
 patchedDependencies:
+  "@expo/cli@55.0.37": patches/@expo__cli@55.0.37.patch
   "@react-native-windows/cli@0.83.2": patches/@react-native-windows/cli@0.83.2.patch
+  nitro-core@1.0.0-alpha.nightly.100.g107f6fc66597: patches/nitro-core@1.0.0-alpha.nightly.100.g107f6fc66597.patch
+  react-native-macos@0.83.0: patches/react-native-macos@0.83.0.patch
+  react-native@0.83.10: patches/react-native@0.83.10.patch

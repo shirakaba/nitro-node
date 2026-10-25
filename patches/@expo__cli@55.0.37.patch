@@ -1,0 +1,33 @@
+diff --git a/build/src/start/platforms/ios/ensureSimulatorAppRunning.js b/build/src/start/platforms/ios/ensureSimulatorAppRunning.js
+index 31296bcbc7a079acf2e5cd5020881fb001897d7d..5904b37dd15cd4a4f79d9b48f88e88606e6c9fe0 100644
+--- a/build/src/start/platforms/ios/ensureSimulatorAppRunning.js
++++ b/build/src/start/platforms/ios/ensureSimulatorAppRunning.js
+@@ -95,7 +95,7 @@ async function waitForSimulatorAppToStart({ maxWaitTime } = {}) {
+ // I think the app can be open while no simulators are booted.
+ async function isSimulatorAppRunningAsync() {
+     try {
+-        const zeroMeansNo = (await _osascript().execAsync('tell app "System Events" to count processes whose name is "Simulator"')).trim();
++        const zeroMeansNo = (await _osascript().execAsync('tell app "System Events" to count processes whose name is "Simulator" or name is "DeviceHub"')).trim();
+         if (zeroMeansNo === '0') {
+             return false;
+         }
+@@ -116,7 +116,18 @@ async function openSimulatorAppAsync(device) {
+         // This has no effect if the app is already running.
+         args.push('--args', '-CurrentDeviceUDID', device.udid);
+     }
+-    await (0, _spawnasync().default)('open', args);
++    try {
++        await (0, _spawnasync().default)('open', args);
++    } catch {
++        // Xcode 27 replaces Simulator.app with DeviceHub (backported from SDK 58).
++        const deviceHubArgs = device.udid ? [
++            `devices://device/open?id=${device.udid}`
++        ] : [
++            '-a',
++            'DeviceHub'
++        ];
++        await (0, _spawnasync().default)('open', deviceHubArgs);
++    }
+ }
+ 
+ //# sourceMappingURL=ensureSimulatorAppRunning.js.map

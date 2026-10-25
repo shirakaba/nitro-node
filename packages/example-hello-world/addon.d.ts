@@ -1,4 +1,4 @@
-import type { HybridObject } from "nitro-node";
+import type { HybridObject } from "nitro-core";
 
 declare class HelloWorld extends HybridObject {
   constructor();
