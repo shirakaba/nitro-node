@@ -1,6 +1,6 @@
 packages:
   - packages/*
-  - examples/*
+  - demos/*
 
 catalog:
   cmake-js: ^8.0.0

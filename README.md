@@ -1,15 +1,16 @@
 # Nitro v1 on Node.js (macOS proof of concept)
 
-Working: the `nitro-node` library wraps Node's existing JavaScript environment with Microsoft's **node-api-jsi** and installs Nitro v1's unmodified C++ core. A separate `hello-world` workspace builds and loads its own native addon into that host. JavaScript runs in Node's V8 engine. There is no Hermes runtime or React Native application involved.
+Working: the `nitro-node` library wraps Node's existing JavaScript environment with Microsoft's **node-api-jsi** and installs Nitro v1's unmodified C++ core. The `example-hello-world` library builds its own native addon and exposes explicit initialization. A separate demo application consumes that library. JavaScript runs in Node's V8 engine. There is no Hermes runtime or React Native application involved.
 
 ## Workspace boundary
 
-| Workspace                                      | Owns                                                                                                                               |
-| ---------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| [`packages/nitro-node`](packages/nitro-node)   | Node-API/JSI runtime, lifetime management, Nitro installation, generic native addon loading, shared native library, and CMake SDK. |
-| [`examples/hello-world`](examples/hello-world) | The `HelloWorld` class, its registration, the `jsiHello` function, JavaScript wrappers, demo runner, and demo tests.               |
+| Workspace                                                      | Owns                                                                                                                               |
+| -------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| [`packages/nitro-node`](packages/nitro-node)                   | Node-API/JSI runtime, lifetime management, Nitro installation, generic native addon loading, shared native library, and CMake SDK. |
+| [`packages/example-hello-world`](packages/example-hello-world) | The `HelloWorld` class, its registration, the `jsiHello` function, explicit module initialization, declarations, and module tests. |
+| [`demos/hello-world`](demos/hello-world)                       | The consumer application, which initializes the module and prints its output.                                                      |
 
-The library exports `init()` and `loadAddon()`. Importing it loads no native code and installs no globals. `init()` synchronously installs Nitro's built-in classes and returns the populated `NitroModulesProxy`; repeated calls return the same proxy. The example calls `init()` before loading its native addon and exports `HelloWorld` and `jsiHello`. Both addons link the library's shared runtime, keeping a single class registry and JSI implementation.
+`nitro-node` exports `init()` and `loadAddon()`. Its `init()` synchronously installs Nitro's built-in classes and returns the populated `NitroModulesProxy`; repeated calls return the same proxy. `example-hello-world` exports its own idempotent `init()`, which initializes the host, loads its native addon, and returns `{ HelloWorld, jsiHello }`. Both libraries are marked `"sideEffects": false`: importing either loads no native code and installs no globals. The demo calls the example module's initializer explicitly. Both native addons link the host's shared runtime, keeping a single class registry and JSI implementation.
 
 ## Run
 
@@ -20,9 +21,11 @@ From the repository root:
 ```sh
 pnpm install
 pnpm build
-pnpm --filter hello-world start
+pnpm --filter demo-hello-world start
 pnpm --filter nitro-node test
-pnpm --filter hello-world test
+pnpm --filter example-hello-world test
+pnpm --filter example-hello-world typecheck
+pnpm --filter demo-hello-world typecheck
 ```
 
 The example prints:
@@ -33,24 +36,25 @@ Hello, macOS! From Nitro v1 on Node.js.
 [HybridObject HelloWorld]
 ```
 
-Each workspace uses `"build": "cmake-js compile"`. The root build runs them in dependency order, so the host is available before the example. cmake-js supplies bundled Node-API headers using each package's `binary.napi_versions` setting; no system Node header directory is needed. After installing dependencies, building requires no further downloads. The host outputs `packages/nitro-node/build/Release/nitro_node.node` and `libnitro_node_runtime.dylib`; the example outputs `examples/hello-world/build/Release/hello_world.node`.
+Each native workspace uses `"build": "cmake-js compile"`. The root build runs them in dependency order, so the host is available before the example module. The demo has no native build step. cmake-js supplies bundled Node-API headers using each native package's `binary.napi_versions` setting; no system Node header directory is needed. After installing dependencies, building requires no further downloads. The host outputs `packages/nitro-node/build/Release/nitro_node.node` and `libnitro_node_runtime.dylib`; the example module outputs `packages/example-hello-world/build/Release/hello_world.node`.
 
-To build only the example and its workspace dependencies, use `pnpm --filter hello-world... build`. The example's CMake project discovers the SDK through its installed `nitro-node` dependency and uses `find_package(NitroNode CONFIG REQUIRED)`.
+To build only the example module and its workspace dependencies, use `pnpm --filter example-hello-world... build`. The module's CMake project discovers the SDK through its installed `nitro-node` dependency and uses `find_package(NitroNode CONFIG REQUIRED)`.
 
 ## Use
 
 ```js
-import { jsiHello, HelloWorld } from "./examples/hello-world/addon.js";
+import { init } from "./packages/example-hello-world/addon.js";
 
+const { jsiHello, HelloWorld } = init();
 console.log(jsiHello("World"));
 
 const hello = new HelloWorld();
 console.log(hello.greet("World"));
 ```
 
-The library defers `process.dlopen()` until `init()` is called. `loadAddon()` requires that explicit initialization first. Every workspace declares `"type": "module"`, so JavaScript files use `.js` extensions. Workers dynamically import the example, which explicitly initializes their own host runtime.
+Both libraries defer native loading until their `init()` functions are called. The host's `loadAddon()` requires explicit host initialization first. Every workspace declares `"type": "module"`, so JavaScript files use `.js` extensions. Workers dynamically import the example module and call its initializer to create their own bindings.
 
-`jsiHello` is a plain JSI HostFunction. `HelloWorld` uses Nitro's actual `HybridObject`, `HybridClass`, argument conversion, constructor/prototype creation, and native-state storage. Its class descriptor is handwritten for this small example, rather than generated by Nitrogen. The example's native installer receives a `jsi::Runtime&` through the host's public `initializeAddon` helper. See the [host API](packages/nitro-node/README.md) and [example layout](examples/hello-world/README.md).
+`jsiHello` is a plain JSI HostFunction. `HelloWorld` uses Nitro's actual `HybridObject`, `HybridClass`, argument conversion, constructor/prototype creation, and native-state storage. Its class descriptor is handwritten for this small example, rather than generated by Nitrogen. The example's native installer receives a `jsi::Runtime&` through the host's public `initializeAddon` helper. See the [host API](packages/nitro-node/README.md), [module API](packages/example-hello-world/README.md), and [demo](demos/hello-world/README.md).
 
 The host uses `nitro::install(runtime)`. Nitro's implementation sets `globalThis.NitroModulesProxy`, and `nitro-core` reads that global; the host preserves this upstream behavior when `init()` is called. Its shared runtime library compiles every source file in the installed package's `cpp/core/src` and `apple/core/src`, without editing Nitro. The Apple core provides pthread/dispatch thread utilities and logging. The host does not import Nitro's React Native JavaScript entry point, which still uses `TurboModuleRegistry` for initialization. React Native's installed package supplies the JSI headers and `jsi.cpp`; React Native framework code, TurboModules, and Apple UI integrations are not linked. The linker permits only explicit Node-API imports to remain unresolved, so missing Nitro/JSI dependencies fail the build.
 

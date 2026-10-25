@@ -4,12 +4,34 @@ import { setImmediate } from "node:timers/promises";
 import { Worker } from "node:worker_threads";
 import { test } from "node:test";
 import { fileURLToPath } from "node:url";
-import { init, loadAddon } from "nitro-node";
-import { HelloWorld, jsiHello } from "../addon.js";
+import process from "node:process";
+import { init as initNitro, loadAddon } from "nitro-node";
+import { init } from "../addon.js";
 
-const NitroModulesProxy = init();
+test("importing the module does not load native code or install globals", async (t) => {
+  const dlopen = t.mock.method(process, "dlopen", () => {
+    throw new Error("Native code must not load during import");
+  });
+  await import(new URL("../addon.js?import-only", import.meta.url).href);
+  assert.equal(dlopen.mock.callCount(), 0);
+  assert.equal(Object.hasOwn(globalThis, "NitroModulesProxy"), false);
+  assert.equal(Object.hasOwn(globalThis, "jsiHello"), false);
+});
+
+test("init is idempotent and returns the installed native bindings", (t) => {
+  const bindings = init();
+  const dlopen = t.mock.method(process, "dlopen", () => {
+    throw new Error("Repeated initialization must not reload native code");
+  });
+  assert.equal(init(), bindings);
+  assert.equal(init(), bindings);
+  assert.equal(bindings.jsiHello, globalThis.jsiHello);
+  assert.equal(bindings.HelloWorld, initNitro().getHybridClass("HelloWorld"));
+  assert.equal(dlopen.mock.callCount(), 0);
+});
 
 test("JSI installs a callable native function into the actual Node global", () => {
+  const { jsiHello } = init();
   assert.equal(global.jsiHello, jsiHello);
   assert.equal(jsiHello("macOS"), "Hello, macOS! From JSI on Node.js.");
   // @ts-expect-error Deliberately pass an invalid argument.
@@ -20,20 +42,23 @@ test("JSI installs a callable native function into the actual Node global", () =
 
 test("dynamic and package imports reuse the installed native bindings", async () => {
   const direct = await import("../addon.js");
-  const packaged = await import("hello-world");
+  const packaged = await import("example-hello-world");
   assert.equal(direct, packaged);
-  assert.equal(direct.jsiHello, jsiHello);
+  assert.equal(direct.init(), init());
   const host = await import("nitro-node");
-  assert.equal(host.init(), NitroModulesProxy);
+  assert.equal(host.init(), initNitro());
 });
 
 test("loading the example addon again reuses its bindings", () => {
+  const { jsiHello } = init();
   const url = new URL("../build/Release/hello_world.node", import.meta.url);
   assert.equal(loadAddon(url), loadAddon(fileURLToPath(url)));
   assert.equal(globalThis.jsiHello, jsiHello);
 });
 
 test("Nitro installs its real proxy and registers a constructible HybridClass", () => {
+  const { HelloWorld } = init();
+  const NitroModulesProxy = initNitro();
   assert.equal(global.NitroModulesProxy, NitroModulesProxy);
   assert.equal(NitroModulesProxy.hasHybridClass("HelloWorld"), true);
   assert.ok(NitroModulesProxy.getAllHybridClassNames().includes("HelloWorld"));
@@ -48,6 +73,7 @@ test("Nitro installs its real proxy and registers a constructible HybridClass", 
 });
 
 test("strings cross Node-API, JSI, and Nitro with Unicode and embedded NULs", () => {
+  const { HelloWorld, jsiHello } = init();
   const hello = new HelloWorld();
   for (const name of ["", "世界 🌏", "a\0b", "é e\u0301"]) {
     assert.equal(jsiHello(name), `Hello, ${name}! From JSI on Node.js.`);
@@ -56,6 +82,8 @@ test("strings cross Node-API, JSI, and Nitro with Unicode and embedded NULs", ()
 });
 
 test("Nitro errors propagate back to JavaScript and subsequent calls work", () => {
+  const { HelloWorld } = init();
+  const NitroModulesProxy = initNitro();
   const hello = new HelloWorld();
   // @ts-expect-error Deliberately pass an invalid argument.
   assert.throws(() => hello.greet(42));
@@ -66,6 +94,8 @@ test("Nitro errors propagate back to JavaScript and subsequent calls work", () =
 });
 
 test("Nitro dispose removes native state and rejects further method calls", () => {
+  const { HelloWorld } = init();
+  const NitroModulesProxy = initNitro();
   const hello = new HelloWorld();
   hello.dispose();
   assert.equal(NitroModulesProxy.hasNativeState(hello), false);
@@ -73,6 +103,7 @@ test("Nitro dispose removes native state and rejects further method calls", () =
 });
 
 test("bindings survive addon initialization, event loop turns, and garbage collection", async () => {
+  const { HelloWorld, jsiHello } = init();
   assert.ok(global.gc, "Run the tests with --expose-gc");
   const hello = new HelloWorld();
   for (let turn = 0; turn < 3; turn++) {
@@ -85,6 +116,7 @@ test("bindings survive addon initialization, event loop turns, and garbage colle
 });
 
 test("Workers get independent runtimes and exit cleanly", async () => {
+  const { jsiHello } = init();
   const addonURL = new URL("../addon.js", import.meta.url).href;
   await Promise.all(
     Array.from({ length: 3 }, async () => {

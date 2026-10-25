@@ -197,11 +197,11 @@ importers:
         specifier: ^1.89.0
         version: 1.89.0
 
-  examples/hello-world:
+  demos/hello-world:
     dependencies:
-      nitro-node:
+      example-hello-world:
         specifier: workspace:*
-        version: link:../../packages/nitro-node
+        version: link:../../packages/example-hello-world
     devDependencies:
       '@tsconfig/node24':
         specifier: 'catalog:'
@@ -209,6 +209,25 @@ importers:
       '@types/node':
         specifier: 'catalog:'
         version: 24.19.2
+      '@typescript/native':
+        specifier: 'catalog:'
+        version: typescript@7.0.2
+
+  packages/example-hello-world:
+    dependencies:
+      nitro-node:
+        specifier: workspace:*
+        version: link:../nitro-node
+    devDependencies:
+      '@tsconfig/node24':
+        specifier: 'catalog:'
+        version: 24.0.5
+      '@types/node':
+        specifier: 'catalog:'
+        version: 24.19.2
+      '@typescript/native':
+        specifier: 'catalog:'
+        version: typescript@7.0.2
       cmake-js:
         specifier: 'catalog:'
         version: 8.0.0(supports-color@8.1.1)

@@ -1,0 +1,18 @@
+{
+  "name": "demo-hello-world",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "example-hello-world": "workspace:*"
+  },
+  "devDependencies": {
+    "@tsconfig/node24": "catalog:",
+    "@types/node": "catalog:",
+    "@typescript/native": "catalog:"
+  }
+}

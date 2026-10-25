@@ -7,7 +7,7 @@ The reusable Node.js host for Nitro v1. This workspace owns:
 - `loadAddon()`, which loads a user's native addon into that runtime.
 - The shared native library containing JSI and Nitro, plus the CMake SDK for user addons.
 
-User modules live in separate workspaces. The complete example is [hello-world](../../examples/hello-world).
+User modules live in separate workspaces. The example native module is [example-hello-world](../example-hello-world); its consumer application is [demos/hello-world](../../demos/hello-world).
 
 ## JavaScript API
 
@@ -78,7 +78,7 @@ nitro_node_add_addon(my_module src/addon.cpp)
 
 Node's ESM resolver locates the SDK through the installed `nitro-node` dependency, including pnpm workspace links. `NitroNode_DIR` may also be supplied explicitly to CMake. The SDK target carries the shared runtime, JSI/Nitro include paths, and matching compile settings; `nitro_node_add_addon` also consumes cmake-js's Node include/library/source settings.
 
-Build the host before building its addons. In this monorepo, `pnpm build` builds workspaces in dependency order; `pnpm --filter hello-world... build` builds the example and its workspace dependencies. An addon's own `pnpm build` runs only cmake-js for that addon. The host and all user addons share one copy of Nitro's class registry and JSI implementation. The current SDK imports targets from the host's local build; distributing relocatable SDKs/prebuilds remains future work.
+Build the host before building its addons. In this monorepo, `pnpm build` builds native workspaces in dependency order; `pnpm --filter example-hello-world... build` builds the example module and its workspace dependencies. An addon's own `pnpm build` runs only cmake-js for that addon. The host and all user addons share one copy of Nitro's class registry and JSI implementation. The current SDK imports targets from the host's local build; distributing relocatable SDKs/prebuilds remains future work.
 
 cmake-js places Release binaries in `build/Release`, which the JavaScript entry points load with `process.dlopen()`.
 

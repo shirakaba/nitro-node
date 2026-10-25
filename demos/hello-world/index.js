@@ -1,5 +1,6 @@
-import { jsiHello, HelloWorld } from "./addon.js";
+import { init } from "example-hello-world";
 
+const { jsiHello, HelloWorld } = init();
 console.log(jsiHello("macOS"));
 const hello = new HelloWorld();
 console.log(hello.greet("macOS"));

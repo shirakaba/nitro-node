@@ -1,5 +1,5 @@
 {
-  "name": "hello-world",
+  "name": "example-hello-world",
   "version": "0.1.0",
   "private": true,
   "binary": {
@@ -7,13 +7,20 @@
       8
     ]
   },
+  "files": [
+    "addon.js",
+    "addon.d.ts",
+    "CMakeLists.txt",
+    "src"
+  ],
   "type": "module",
+  "sideEffects": false,
   "types": "./addon.d.ts",
   "exports": "./addon.js",
   "scripts": {
     "build": "cmake-js compile",
     "install": "node --run build",
-    "start": "node index.js",
+    "typecheck": "tsc --noEmit",
     "test": "node --expose-gc --test test/*.test.js"
   },
   "dependencies": {
@@ -22,6 +29,7 @@
   "devDependencies": {
     "@tsconfig/node24": "catalog:",
     "@types/node": "catalog:",
+    "@typescript/native": "catalog:",
     "cmake-js": "catalog:"
   }
 }
