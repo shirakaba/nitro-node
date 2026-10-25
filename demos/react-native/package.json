@@ -5,7 +5,7 @@
   "homepage": "https://github.com/shirakaba/expo-desktop/tree/main/templates/blank-typescript",
   "main": "index.ts",
   "scripts": {
-    "postinstall": "patch-package",
+    "postinstall": "cd ../.. && patch-package --patch-dir demos/react-native/patches --error-on-fail",
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
