@@ -5,14 +5,14 @@ This workspace is userland: it depends on `nitro-node` through `workspace:*` and
 - `src/HelloWorld.hpp` and `src/HelloWorld.cpp` define the Nitro HybridObject and its `greet` method.
 - `src/addon.cpp` registers that class and installs the plain JSI `jsiHello` function.
 - `CMakeLists.txt` builds `hello_world.node` against the host's shared runtime.
-- `index.js` loads that addon and exports the demo's JavaScript API.
-- `hello.js` runs the example; `test/` tests its behavior, including Workers.
+- `addon.js` explicitly calls `nitro-node`'s `init()`, loads the example addon, and exports the demo's JavaScript API.
+- `index.js` runs the example; `test/` tests its behavior, including Workers.
 
 From the repository root:
 
 ```sh
 pnpm --filter hello-world... build
-pnpm --filter hello-world hello
+pnpm --filter hello-world start
 pnpm --filter hello-world test
 ```
 

@@ -3,7 +3,7 @@
 The reusable Node.js host for Nitro v1. This workspace owns:
 
 - The node-api-jsi runtime and its lifetime in each Node environment, including Workers.
-- Installation and export of `NitroModulesProxy`.
+- Explicit initialization through `init()`, which returns `NitroModulesProxy`.
 - `loadAddon()`, which loads a user's native addon into that runtime.
 - The shared native library containing JSI and Nitro, plus the CMake SDK for user addons.
 
@@ -12,14 +12,19 @@ User modules live in separate workspaces. The complete example is [hello-world](
 ## JavaScript API
 
 ```js
-import { loadAddon, NitroModulesProxy } from "nitro-node";
+import { init, loadAddon } from "nitro-node";
 
+const NitroModulesProxy = init();
 loadAddon(new URL("./build/Release/my_module.node", import.meta.url));
 const MyModule = NitroModulesProxy.getHybridClass("MyModule");
 const instance = new MyModule();
 ```
 
-`loadAddon()` accepts a file URL or filesystem path and caches successful installations by absolute path. The library's ESM entry point loads native addons with `process.dlopen()`. The runtime handle stays private to the loader.
+Importing `nitro-node` loads no native code and installs no globals. `init()` synchronously loads the host, initializes the JSI runtime, and returns its populated proxy. It is idempotent within each Node environment: repeated calls return the same proxy without loading or installing Nitro again. Native binaries must be built before calling it.
+
+Nitro's own `install(runtime)` creates `globalThis.NitroModulesProxy`, and `nitro-core` reads that global as its entry point. The host preserves this upstream contract. The global is absent before `init()` and present afterward; the returned proxy has a non-optional type.
+
+`loadAddon()` requires `init()` to have completed first. It accepts a file URL or filesystem path and caches successful installations by absolute path. Native loading uses `process.dlopen()`, and the runtime handle stays private to the loader.
 
 ## Native addon contract
 
