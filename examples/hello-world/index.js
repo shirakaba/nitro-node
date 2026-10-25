@@ -1,6 +1,6 @@
-import { loadAddon, NitroModulesProxy } from "nitro-node";
+import { jsiHello, HelloWorld } from "./addon.js";
 
-loadAddon(new URL("./build/Release/hello_world.node", import.meta.url));
-
-export const jsiHello = globalThis.jsiHello;
-export const HelloWorld = NitroModulesProxy.getHybridClass("HelloWorld");
+console.log(jsiHello("macOS"));
+const hello = new HelloWorld();
+console.log(hello.greet("macOS"));
+console.log(hello.toString());

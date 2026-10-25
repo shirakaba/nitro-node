@@ -5,7 +5,7 @@ import { Worker } from "node:worker_threads";
 import { test } from "node:test";
 import { fileURLToPath } from "node:url";
 import { loadAddon, NitroModulesProxy } from "nitro-node";
-import { jsiHello } from "../index.js";
+import { jsiHello } from "../addon.js";
 
 test("JSI installs a callable native function into the actual Node global", () => {
   assert.equal(global.jsiHello, jsiHello);
@@ -15,7 +15,7 @@ test("JSI installs a callable native function into the actual Node global", () =
 });
 
 test("dynamic and package imports reuse the installed native bindings", async () => {
-  const direct = await import("../index.js");
+  const direct = await import("../addon.js");
   const packaged = await import("hello-world");
   assert.equal(direct, packaged);
   assert.equal(direct.jsiHello, jsiHello);
@@ -82,7 +82,7 @@ test("bindings survive addon initialization, event loop turns, and garbage colle
 });
 
 test("Workers get independent runtimes and exit cleanly", async () => {
-  const addonURL = new URL("../index.js", import.meta.url).href;
+  const addonURL = new URL("../addon.js", import.meta.url).href;
   await Promise.all(
     Array.from({ length: 3 }, async () => {
       const worker = new Worker(new URL("./fixtures/hello-worker.js", import.meta.url), {
