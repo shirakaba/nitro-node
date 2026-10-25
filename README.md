@@ -4,22 +4,22 @@ Working: the `nitro-node` library wraps Node's existing JavaScript environment w
 
 ## Workspace boundary
 
-| Workspace                                      | Owns                                                                                                                                   |
-| ---------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| [`packages/nitro-node`](packages/nitro-node)   | Node-API/JSI runtime, lifetime management, Nitro installation, generic native addon loading, shared native library, and build helpers. |
-| [`examples/hello-world`](examples/hello-world) | The `HelloWorld` class, its registration, the `jsiHello` function, JavaScript wrappers, demo runner, and demo tests.                   |
+| Workspace                                      | Owns                                                                                                                               |
+| ---------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| [`packages/nitro-node`](packages/nitro-node)   | Node-API/JSI runtime, lifetime management, Nitro installation, generic native addon loading, shared native library, and CMake SDK. |
+| [`examples/hello-world`](examples/hello-world) | The `HelloWorld` class, its registration, the `jsiHello` function, JavaScript wrappers, demo runner, and demo tests.               |
 
 The library exports `NitroModulesProxy` and `loadAddon()`. The example exports `HelloWorld` and `jsiHello`. Importing the library alone installs only Nitro's built-in classes. The example's native addon links the library's shared runtime, keeping a single class registry and JSI implementation.
 
 ## Run
 
-Requirements: macOS, Node.js, pnpm, CMake, and Xcode Command Line Tools (Apple Clang with C++20 support).
+Build requirements: macOS, Node.js 20.17+ within the 20.x line or Node.js 22.9+, pnpm, CMake, and Xcode Command Line Tools (Apple Clang with C++20 support). The Node.js build requirements come from cmake-js 8; compiled addons are also tested on Node.js 20.12.2.
 
 From the repository root:
 
 ```sh
 pnpm install
-pnpm --filter hello-world build
+pnpm build
 pnpm --filter hello-world hello
 pnpm --filter nitro-node test
 pnpm --filter hello-world test
@@ -33,7 +33,9 @@ Hello, macOS! From Nitro v1 on Node.js.
 [HybridObject HelloWorld]
 ```
 
-The example's build first builds the host. The build uses locally installed Node-API headers, first looking next to the running Node executable and then in Homebrew's include directories. If needed, set `NODE_INCLUDE_DIR` to a directory containing `node_api.h`. After installing dependencies, building requires no further downloads. The host outputs `packages/nitro-node/build/nitro_node.node` and `libnitro_node_runtime.dylib`; the example outputs `examples/hello-world/build/hello_world.node`.
+Each workspace uses `"build": "cmake-js compile"`. The root build runs them in dependency order, so the host is available before the example. cmake-js supplies bundled Node-API headers using each package's `binary.napi_versions` setting; no system Node header directory is needed. After installing dependencies, building requires no further downloads. The host outputs `packages/nitro-node/build/Release/nitro_node.node` and `libnitro_node_runtime.dylib`; the example outputs `examples/hello-world/build/Release/hello_world.node`.
+
+To build only the example and its workspace dependencies, use `pnpm --filter hello-world... build`. The example's CMake project discovers the SDK through its installed `nitro-node` dependency and uses `find_package(NitroNode CONFIG REQUIRED)`.
 
 ## Use
 
@@ -59,7 +61,7 @@ The host uses `nitro::install(runtime)`. Its shared runtime library compiles eve
 - **Node-API stability does not make arbitrary JSI C++ binaries compatible.** Nitro, node-api-jsi, and `jsi.cpp` are compiled together against the same JSI headers. `JSI_VERSION=21` selects the upstream adapter's implemented feature branches; it does not downgrade the installed headers or make different JSI vtables interchangeable. This result establishes source compatibility for this build and the exercised behavior, not blanket support for every future JSI feature.
 - **“Decoupled” refers to the core and host integration.** The installed v1 package separates its C++ core from the React Native adapter. The latter still uses a TurboModule to obtain a runtime and call `nitro::install`. Node supplies that runtime through node-api-jsi instead.
 
-Verified on this Apple Silicon Mac with Apple Clang 21.0.0 and Nitro `1.0.0-alpha.nightly.100.g107f6fc66597`. The **same arm64 host, shared library, and example addon**, built using Node 24.14.0 headers, pass the host and example tests on Node **20.12.2**, **22.19.0**, and **24.14.0**. The tests exercise the host independently of any user addon, direct JSI calls, shared bindings across static/dynamic/package ESM imports, cached addon loading, Nitro class construction and inheritance, Unicode and embedded NULs, error recovery, disposal, calls after event-loop turns and forced garbage collection, and concurrent Workers with clean exits.
+Verified on this Apple Silicon Mac with Apple Clang 21.0.0 and Nitro `1.0.0-alpha.nightly.100.g107f6fc66597`. The **same arm64 host, shared library, and example addon**, built with Node 24.14.0 and cmake-js 8, pass the host and example tests on Node **20.12.2**, **22.19.0**, and **24.14.0**. The tests exercise the host independently of any user addon, direct JSI calls, shared bindings across static/dynamic/package ESM imports, cached addon loading, Nitro class construction and inheritance, Unicode and embedded NULs, error recovery, disposal, calls after event-loop turns and forced garbage collection, and concurrent Workers with clean exits.
 
 ## Scope
 

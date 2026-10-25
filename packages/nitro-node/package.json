@@ -10,10 +10,10 @@
   "main": "index.js",
   "exports": {
     ".": "./index.js",
-    "./build": "./scripts/build.js"
+    "./cmake": "./cmake/NitroNodeConfig.cmake"
   },
   "scripts": {
-    "build": "node scripts/build.js",
+    "build": "cmake-js compile",
     "test": "node --expose-gc --test test/*.test.js",
     "typecheck": "tsc --noEmit"
   },
@@ -23,6 +23,7 @@
   "devDependencies": {
     "@types/node": "catalog:",
     "@typescript/native": "catalog:",
+    "cmake-js": "catalog:",
     "typescript": "catalog:"
   }
 }

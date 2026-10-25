@@ -5,7 +5,7 @@ The reusable Node.js host for Nitro v1. This workspace owns:
 - The node-api-jsi runtime and its lifetime in each Node environment, including Workers.
 - Installation and export of `NitroModulesProxy`.
 - `loadAddon()`, which loads a user's native addon into that runtime.
-- The shared native library containing JSI and Nitro, plus native addon build helpers.
+- The shared native library containing JSI and Nitro, plus the CMake SDK for user addons.
 
 User modules live in separate workspaces. The complete example is [hello-world](../../examples/hello-world).
 
@@ -14,7 +14,7 @@ User modules live in separate workspaces. The complete example is [hello-world](
 ```js
 import { loadAddon, NitroModulesProxy } from "nitro-node";
 
-loadAddon(new URL("./build/my_module.node", import.meta.url));
+loadAddon(new URL("./build/Release/my_module.node", import.meta.url));
 const MyModule = NitroModulesProxy.getHybridClass("MyModule");
 const instance = new MyModule();
 ```
@@ -37,24 +37,45 @@ NAPI_MODULE(my_module, nitro_node::initializeAddon<installMyModule>)
 
 `initializeAddon` exposes the native installer expected by `loadAddon()`, passes in the host's runtime, and translates installation errors back to JavaScript. Installers run synchronously on the calling environment's JavaScript thread.
 
-The user's `CMakeLists.txt` links against the host's shared runtime:
+## Building with cmake-js
+
+Both the host and user addons use [cmake-js](https://github.com/cmake-js/cmake-js). Add `cmake-js` as a development dependency and use this package configuration:
+
+```json
+{
+  "scripts": {
+    "build": "cmake-js compile"
+  },
+  "binary": {
+    "napi_versions": [8]
+  }
+}
+```
+
+The `binary` setting tells cmake-js to use its bundled Node-API headers. The build does not need a separately installed Node header directory or a Node header download.
+
+The user's `CMakeLists.txt` discovers the installed SDK and links against its shared runtime:
 
 ```cmake
 cmake_minimum_required(VERSION 3.20)
 project(my_module LANGUAGES CXX)
+
+find_program(NODE_EXECUTABLE NAMES node REQUIRED)
+execute_process(
+  COMMAND "${NODE_EXECUTABLE}" --input-type=module -e "import { dirname } from 'node:path'; import { fileURLToPath } from 'node:url'; process.stdout.write(dirname(fileURLToPath(import.meta.resolve('nitro-node/cmake'))));"
+  WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+  OUTPUT_VARIABLE NitroNode_DIR
+  COMMAND_ERROR_IS_FATAL ANY
+)
 find_package(NitroNode CONFIG REQUIRED)
 nitro_node_add_addon(my_module src/addon.cpp)
 ```
 
-From the user's `scripts/build.js`:
+Node's ESM resolver locates the SDK through the installed `nitro-node` dependency, including pnpm workspace links. `NitroNode_DIR` may also be supplied explicitly to CMake. The SDK target carries the shared runtime, JSI/Nitro include paths, and matching compile settings; `nitro_node_add_addon` also consumes cmake-js's Node include/library/source settings.
 
-```js
-import { buildAddon } from "nitro-node/build";
+Build the host before building its addons. In this monorepo, `pnpm build` builds workspaces in dependency order; `pnpm --filter hello-world... build` builds the example and its workspace dependencies. An addon's own `pnpm build` runs only cmake-js for that addon. The host and all user addons share one copy of Nitro's class registry and JSI implementation. The current SDK imports targets from the host's local build; distributing relocatable SDKs/prebuilds remains future work.
 
-buildAddon(new URL("..", import.meta.url));
-```
-
-`buildAddon()` first builds the host and then the user's CMake project. It supplies the `NitroNode` CMake package, including the shared runtime and matching include paths/compile settings. The host and all user addons share one copy of Nitro's class registry and JSI implementation. The current CMake package references the local checkout and build directory; distributing relocatable packages/prebuilds remains future work.
+cmake-js places Release binaries in `build/Release`, which the JavaScript entry points load with `process.dlopen()`.
 
 Build and test the host independently:
 

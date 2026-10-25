@@ -11,12 +11,14 @@ This workspace is userland: it depends on `nitro-node` through `workspace:*` and
 From the repository root:
 
 ```sh
-pnpm --filter hello-world build
+pnpm --filter hello-world... build
 pnpm --filter hello-world hello
 pnpm --filter hello-world test
 ```
 
-The build also builds the `nitro-node` host. Neither the host's source nor its build configuration refers to this example.
+Both workspaces use `"build": "cmake-js compile"`. The `...` filter builds `nitro-node` first, following workspace dependencies. Alternatively, run `pnpm build` at the repository root to build every workspace in dependency order. Once the host has been built, `pnpm --filter hello-world build` builds only this example.
+
+The example's CMake configuration locates the SDK through the installed `nitro-node/cmake` export. Neither the host's source nor its build configuration refers to this example. The output is `build/Release/hello_world.node`.
 
 The JavaScript API is:
 

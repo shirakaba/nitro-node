@@ -24,7 +24,7 @@ test("dynamic and package imports reuse the installed native bindings", async ()
 });
 
 test("loading the example addon again reuses its bindings", () => {
-  const url = new URL("../build/hello_world.node", import.meta.url);
+  const url = new URL("../build/Release/hello_world.node", import.meta.url);
   assert.equal(loadAddon(url), loadAddon(fileURLToPath(url)));
   assert.equal(globalThis.jsiHello, jsiHello);
 });

@@ -2,14 +2,22 @@
   "name": "hello-world",
   "version": "0.1.0",
   "private": true,
+  "binary": {
+    "napi_versions": [
+      8
+    ]
+  },
   "type": "module",
   "exports": "./index.js",
   "scripts": {
-    "build": "node scripts/build.js",
+    "build": "cmake-js compile",
     "hello": "node hello.js",
     "test": "node --expose-gc --test test/*.test.js"
   },
   "dependencies": {
     "nitro-node": "workspace:*"
+  },
+  "devDependencies": {
+    "cmake-js": "catalog:"
   }
 }

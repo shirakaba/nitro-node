@@ -1,6 +1,7 @@
 function(nitro_node_add_addon target)
-  add_library(${target} MODULE ${ARGN})
-  target_link_libraries(${target} PRIVATE NitroNode::runtime)
+  add_library(${target} MODULE ${ARGN} ${CMAKE_JS_SRC})
+  target_include_directories(${target} PRIVATE ${CMAKE_JS_INC})
+  target_link_libraries(${target} PRIVATE NitroNode::runtime ${CMAKE_JS_LIB})
   set_target_properties(${target} PROPERTIES PREFIX "" SUFFIX ".node" CXX_EXTENSIONS OFF)
 
   # Only the Node-API calls used by the host and Addon.hpp may remain unresolved.

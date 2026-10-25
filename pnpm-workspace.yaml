@@ -3,6 +3,7 @@ packages:
   - examples/*
 
 catalog:
+  cmake-js: ^8.0.0
   "@types/node": ^24.13.6
   # Places the npm package `typescript`, which provides `tsc` v7,
   # into node_modules/@typescript/native. We can call this for all typechecking.

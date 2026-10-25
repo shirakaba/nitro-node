@@ -9,7 +9,33 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-foreach(required_path NODE_INCLUDE_DIR JSI_DIR NITRO_DIR)
+if(NOT CMAKE_JS_VERSION)
+  message(FATAL_ERROR "Build with cmake-js (pnpm --filter nitro-node build).")
+endif()
+
+# cmake-js enables unresolved symbols for SHARED Node addons. Our addons are
+# MODULE targets with explicit Node-API imports; the shared runtime is a normal
+# library whose dependencies must all resolve at link time.
+string(REPLACE "-undefined dynamic_lookup" "" CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS}")
+
+# Resolve installed dependencies using Node's ESM resolver instead of assuming
+# a particular node_modules layout. cmake-js supplies the Node-API headers.
+find_program(NITRO_NODE_NODE_EXECUTABLE NAMES node REQUIRED)
+execute_process(
+  COMMAND "${NITRO_NODE_NODE_EXECUTABLE}" --input-type=module -e [=[
+    import { dirname, resolve } from 'node:path';
+    import { fileURLToPath } from 'node:url';
+    const nitro = dirname(fileURLToPath(import.meta.resolve('react-native-nitro-modules/package.json')));
+    process.stdout.write(JSON.stringify({ nitro, jsi: resolve(nitro, '../react-native/ReactCommon/jsi') }));
+  ]=]
+  WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+  OUTPUT_VARIABLE dependency_paths
+  COMMAND_ERROR_IS_FATAL ANY
+)
+string(JSON NITRO_DIR GET "${dependency_paths}" nitro)
+string(JSON JSI_DIR GET "${dependency_paths}" jsi)
+
+foreach(required_path JSI_DIR NITRO_DIR)
   if(NOT IS_DIRECTORY "${${required_path}}")
     message(FATAL_ERROR "${required_path} must point to an existing directory.")
   endif()
@@ -30,7 +56,7 @@ add_library(nitro_node_runtime SHARED
 )
 
 target_include_directories(nitro_node_runtime PUBLIC
-  "${NODE_INCLUDE_DIR}"
+  ${CMAKE_JS_INC}
   "${JSI_DIR}"
   "${NITRO_DIR}/cpp/core/include"
   "${NITRO_DIR}/apple/core/include"
@@ -60,4 +86,3 @@ target_include_directories(nitro_node PRIVATE "${NODE_API_JSI_DIR}/src" "${NODE_
 # Downstream workspaces link this exact shared runtime, so Nitro's registry and
 # JSI implementation are shared rather than compiled into each native addon.
 export(TARGETS nitro_node_runtime NAMESPACE NitroNode:: FILE "${CMAKE_CURRENT_BINARY_DIR}/NitroNodeTargets.cmake")
-configure_file(cmake/NitroNodeConfig.cmake.in "${CMAKE_CURRENT_BINARY_DIR}/NitroNodeConfig.cmake" @ONLY)

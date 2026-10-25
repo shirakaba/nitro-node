@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "build": "pnpm -r run build",
     "prepare": "husky",
     "lint-staged": "lint-staged",
     "format": "oxfmt --write .",

@@ -3,7 +3,10 @@ import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const nativeModule = { exports: {} };
-process.dlopen(nativeModule, fileURLToPath(new URL("./build/nitro_node.node", import.meta.url)));
+process.dlopen(
+  nativeModule,
+  fileURLToPath(new URL("./build/Release/nitro_node.node", import.meta.url)),
+);
 
 export const { NitroModulesProxy } = nativeModule.exports;
 

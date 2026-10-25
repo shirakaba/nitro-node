@@ -1,4 +1,0 @@
-if(NOT TARGET NitroNode::runtime)
-  include("${CMAKE_CURRENT_LIST_DIR}/NitroNodeTargets.cmake")
-endif()
-include("@CMAKE_CURRENT_SOURCE_DIR@/cmake/AddAddon.cmake")
