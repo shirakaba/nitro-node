@@ -18,15 +18,20 @@ endif()
 # library whose dependencies must all resolve at link time.
 string(REPLACE "-undefined dynamic_lookup" "" CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS}")
 
-# Resolve installed dependencies using Node's ESM resolver instead of assuming
-# a particular node_modules layout. cmake-js supplies the Node-API headers.
+# Resolve React Native from Nitro's package so its peer dependency supplies JSI,
+# including when a hoisted workspace has another React Native version at its root.
+# cmake-js supplies the Node-API headers.
 find_program(NITRO_NODE_NODE_EXECUTABLE NAMES node REQUIRED)
 execute_process(
   COMMAND "${NITRO_NODE_NODE_EXECUTABLE}" --input-type=module -e [=[
+    import { createRequire } from 'node:module';
     import { dirname, resolve } from 'node:path';
     import { fileURLToPath } from 'node:url';
-    const nitro = dirname(fileURLToPath(import.meta.resolve('react-native-nitro-modules/package.json')));
-    process.stdout.write(JSON.stringify({ nitro, jsi: resolve(nitro, '../react-native/ReactCommon/jsi') }));
+    const nitroPackage = import.meta.resolve('react-native-nitro-modules/package.json');
+    const nitro = dirname(fileURLToPath(nitroPackage));
+    const requireFromNitro = createRequire(nitroPackage);
+    const reactNative = dirname(requireFromNitro.resolve('react-native/package.json'));
+    process.stdout.write(JSON.stringify({ nitro, jsi: resolve(reactNative, 'ReactCommon/jsi') }));
   ]=]
   WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
   OUTPUT_VARIABLE dependency_paths
