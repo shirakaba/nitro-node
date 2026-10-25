@@ -24,12 +24,12 @@
     "test": "node --expose-gc --test test/*.test.js"
   },
   "dependencies": {
+    "cmake-js": "catalog:",
     "nitro-node": "workspace:*"
   },
   "devDependencies": {
     "@tsconfig/node24": "catalog:",
     "@types/node": "catalog:",
-    "@typescript/native": "catalog:",
-    "cmake-js": "catalog:"
+    "@typescript/native": "catalog:"
   }
 }

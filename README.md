@@ -20,7 +20,6 @@ From the repository root:
 
 ```sh
 pnpm install
-pnpm build
 pnpm --filter demo-hello-world start
 pnpm --filter nitro-node test
 pnpm --filter example-hello-world test
@@ -36,7 +35,7 @@ Hello, macOS! From Nitro v1 on Node.js.
 [HybridObject HelloWorld]
 ```
 
-Each native workspace uses `"build": "cmake-js compile"`. The root build runs them in dependency order, so the host is available before the example module. The demo has no native build step. cmake-js supplies bundled Node-API headers using each native package's `binary.napi_versions` setting; no system Node header directory is needed. After installing dependencies, building requires no further downloads. The host outputs `packages/nitro-node/build/Release/nitro_node.node` and `libnitro_node_runtime.dylib`; the example module outputs `packages/example-hello-world/build/Release/hello_world.node`.
+Each native workspace uses `"build": "cmake-js compile"` and `"install": "node --run build"`, with cmake-js in `dependencies` so it is available when installed as a dependency. `pnpm install` builds the host before the example module, following workspace dependencies. After changing native sources, run `pnpm build` at the repository root to rebuild in the same order. The demo has no native build step. cmake-js supplies bundled Node-API headers using each native package's `binary.napi_versions` setting; no system Node header directory is needed. After installing dependencies, building requires no further downloads. The host outputs `packages/nitro-node/build/Release/nitro_node.node` and `libnitro_node_runtime.dylib`; the example module outputs `packages/example-hello-world/build/Release/hello_world.node`.
 
 To build only the example module and its workspace dependencies, use `pnpm --filter example-hello-world... build`. The module's CMake project discovers the SDK through its installed `nitro-node` dependency and uses `find_package(NitroNode CONFIG REQUIRED)`.
 

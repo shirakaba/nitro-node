@@ -44,12 +44,13 @@ NAPI_MODULE(my_module, nitro_node::initializeAddon<installMyModule>)
 
 ## Building with cmake-js
 
-Both the host and user addons use [cmake-js](https://github.com/cmake-js/cmake-js). Add `cmake-js` as a development dependency and use this package configuration:
+Both the host and user addons use [cmake-js](https://github.com/cmake-js/cmake-js). Add `cmake-js` to `dependencies` so it is available when the package builds during installation, and use this package configuration:
 
 ```json
 {
   "scripts": {
-    "build": "cmake-js compile"
+    "build": "cmake-js compile",
+    "install": "node --run build"
   },
   "binary": {
     "napi_versions": [8]
@@ -78,7 +79,7 @@ nitro_node_add_addon(my_module src/addon.cpp)
 
 Node's ESM resolver locates the SDK through the installed `nitro-node` dependency, including pnpm workspace links. `NitroNode_DIR` may also be supplied explicitly to CMake. The SDK target carries the shared runtime, JSI/Nitro include paths, and matching compile settings; `nitro_node_add_addon` also consumes cmake-js's Node include/library/source settings.
 
-Build the host before building its addons. In this monorepo, `pnpm build` builds native workspaces in dependency order; `pnpm --filter example-hello-world... build` builds the example module and its workspace dependencies. An addon's own `pnpm build` runs only cmake-js for that addon. The host and all user addons share one copy of Nitro's class registry and JSI implementation. The current SDK imports targets from the host's local build; distributing relocatable SDKs/prebuilds remains future work.
+The host must be built before its addons. In this monorepo, `pnpm install` runs both native packages' install scripts in dependency order. After native source changes, `pnpm build` rebuilds native workspaces in dependency order; `pnpm --filter example-hello-world... build` rebuilds the example module and its workspace dependencies. An addon's own `pnpm build` runs only cmake-js for that addon. The host and all user addons share one copy of Nitro's class registry and JSI implementation. The current SDK imports targets from the host's local build; distributing relocatable SDKs/prebuilds remains future work.
 
 cmake-js places Release binaries in `build/Release`, which the JavaScript entry points load with `process.dlopen()`.
 

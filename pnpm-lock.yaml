@@ -215,6 +215,9 @@ importers:
 
   packages/example-hello-world:
     dependencies:
+      cmake-js:
+        specifier: 'catalog:'
+        version: 8.0.0(supports-color@8.1.1)
       nitro-node:
         specifier: workspace:*
         version: link:../nitro-node
@@ -228,12 +231,12 @@ importers:
       '@typescript/native':
         specifier: 'catalog:'
         version: typescript@7.0.2
-      cmake-js:
-        specifier: 'catalog:'
-        version: 8.0.0(supports-color@8.1.1)
 
   packages/nitro-node:
     dependencies:
+      cmake-js:
+        specifier: 'catalog:'
+        version: 8.0.0(supports-color@8.1.1)
       nitro-core:
         specifier: 1.0.0-alpha.nightly.100.g107f6fc66597
         version: 1.0.0-alpha.nightly.100.g107f6fc66597
@@ -247,9 +250,6 @@ importers:
       '@typescript/native':
         specifier: 'catalog:'
         version: typescript@7.0.2
-      cmake-js:
-        specifier: 'catalog:'
-        version: 8.0.0(supports-color@8.1.1)
       typescript:
         specifier: 'catalog:'
         version: '@typescript/typescript6@6.0.2'

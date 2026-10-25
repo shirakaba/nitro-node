@@ -19,7 +19,7 @@ pnpm --filter example-hello-world test
 pnpm --filter example-hello-world typecheck
 ```
 
-Both native workspaces use `"build": "cmake-js compile"`. The `...` filter builds `nitro-node` first, following workspace dependencies. Alternatively, run `pnpm build` at the repository root to build the native workspaces in dependency order. Once the host has been built, `pnpm --filter example-hello-world build` builds only this module.
+Both native workspaces use `"build": "cmake-js compile"` and `"install": "node --run build"`, with cmake-js in `dependencies`. A workspace `pnpm install` builds `nitro-node` first. For rebuilding after native source changes, the `...` filter builds `nitro-node` first, following workspace dependencies. Alternatively, run `pnpm build` at the repository root to rebuild the native workspaces in dependency order. Once the host has been built, `pnpm --filter example-hello-world build` builds only this module.
 
 The example's CMake configuration locates the SDK through the installed `nitro-node/cmake` export. Neither the host's source nor its build configuration refers to this example. The output is `build/Release/hello_world.node`.
 

@@ -19,17 +19,18 @@
   },
   "scripts": {
     "build": "cmake-js compile",
+    "install": "node --run build",
     "test": "node --expose-gc --test test/*.test.js",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "cmake-js": "catalog:",
     "nitro-core": "1.0.0-alpha.nightly.100.g107f6fc66597",
     "react-native-nitro-modules": "1.0.0-alpha.nightly.100.g107f6fc66597"
   },
   "devDependencies": {
     "@types/node": "catalog:",
     "@typescript/native": "catalog:",
-    "cmake-js": "catalog:",
     "typescript": "catalog:"
   }
 }
