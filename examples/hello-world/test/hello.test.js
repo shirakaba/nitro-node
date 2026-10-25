@@ -5,12 +5,14 @@ import { Worker } from "node:worker_threads";
 import { test } from "node:test";
 import { fileURLToPath } from "node:url";
 import { loadAddon, NitroModulesProxy } from "nitro-node";
-import { jsiHello } from "../addon.js";
+import { HelloWorld, jsiHello } from "../addon.js";
 
 test("JSI installs a callable native function into the actual Node global", () => {
   assert.equal(global.jsiHello, jsiHello);
   assert.equal(jsiHello("macOS"), "Hello, macOS! From JSI on Node.js.");
+  // @ts-expect-error Deliberately pass an invalid argument.
   assert.throws(() => jsiHello(42), /jsiHello expects one string argument/);
+  // @ts-expect-error Deliberately omit an argument.
   assert.throws(() => jsiHello(), /jsiHello expects one string argument/);
 });
 
@@ -33,7 +35,7 @@ test("Nitro installs its real proxy and registers a constructible HybridClass", 
   assert.equal(global.NitroModulesProxy, NitroModulesProxy);
   assert.equal(NitroModulesProxy.hasHybridClass("HelloWorld"), true);
   assert.ok(NitroModulesProxy.getAllHybridClassNames().includes("HelloWorld"));
-  const HelloWorld = NitroModulesProxy.getHybridClass("HelloWorld");
+  assert.equal(NitroModulesProxy.getHybridClass("HelloWorld"), HelloWorld);
   const hello = new HelloWorld();
   assert.equal(hello.greet("Node.js"), "Hello, Node.js! From Nitro v1 on Node.js.");
   assert.equal(hello.toString(), "[HybridObject HelloWorld]");
@@ -44,7 +46,6 @@ test("Nitro installs its real proxy and registers a constructible HybridClass", 
 });
 
 test("strings cross Node-API, JSI, and Nitro with Unicode and embedded NULs", () => {
-  const HelloWorld = NitroModulesProxy.getHybridClass("HelloWorld");
   const hello = new HelloWorld();
   for (const name of ["", "世界 🌏", "a\0b", "é e\u0301"]) {
     assert.equal(jsiHello(name), `Hello, ${name}! From JSI on Node.js.`);
@@ -53,16 +54,16 @@ test("strings cross Node-API, JSI, and Nitro with Unicode and embedded NULs", ()
 });
 
 test("Nitro errors propagate back to JavaScript and subsequent calls work", () => {
-  const HelloWorld = NitroModulesProxy.getHybridClass("HelloWorld");
   const hello = new HelloWorld();
+  // @ts-expect-error Deliberately pass an invalid argument.
   assert.throws(() => hello.greet(42));
+  // @ts-expect-error Deliberately omit an argument.
   assert.throws(() => hello.greet());
   assert.throws(() => NitroModulesProxy.getHybridClass("MissingClass"), /not registered/);
   assert.equal(hello.greet("again"), "Hello, again! From Nitro v1 on Node.js.");
 });
 
 test("Nitro dispose removes native state and rejects further method calls", () => {
-  const HelloWorld = NitroModulesProxy.getHybridClass("HelloWorld");
   const hello = new HelloWorld();
   hello.dispose();
   assert.equal(NitroModulesProxy.hasNativeState(hello), false);
@@ -70,7 +71,7 @@ test("Nitro dispose removes native state and rejects further method calls", () =
 });
 
 test("bindings survive addon initialization, event loop turns, and garbage collection", async () => {
-  const HelloWorld = NitroModulesProxy.getHybridClass("HelloWorld");
+  assert.ok(global.gc, "Run the tests with --expose-gc");
   const hello = new HelloWorld();
   for (let turn = 0; turn < 3; turn++) {
     for (let i = 0; i < 500; i++) new HelloWorld().greet("temporary");

@@ -4,5 +4,5 @@
     "noEmit": true,
     "checkJs": true
   },
-  "include": ["**/*.js"]
+  "include": ["**/*.js", "**/*.d.ts"]
 }

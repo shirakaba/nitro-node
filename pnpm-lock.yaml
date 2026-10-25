@@ -215,6 +215,9 @@ importers:
 
   packages/nitro-node:
     dependencies:
+      nitro-core:
+        specifier: 1.0.0-alpha.nightly.100.g107f6fc66597
+        version: 1.0.0-alpha.nightly.100.g107f6fc66597
       react-native-nitro-modules:
         specifier: 1.0.0-alpha.nightly.100.g107f6fc66597
         version: 1.0.0-alpha.nightly.100.g107f6fc66597(react-native@0.88.0(@babel/core@7.29.7(supports-color@8.1.1))(react@19.3.1)(supports-color@8.1.1))(react@19.3.1)

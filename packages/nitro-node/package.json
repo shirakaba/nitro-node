@@ -8,8 +8,12 @@
   },
   "type": "module",
   "main": "index.js",
+  "types": "index.d.ts",
   "exports": {
-    ".": "./index.js",
+    ".": {
+      "types": "./index.d.ts",
+      "default": "./index.js"
+    },
     "./cmake": "./cmake/NitroNodeConfig.cmake"
   },
   "scripts": {
@@ -18,6 +22,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "nitro-core": "1.0.0-alpha.nightly.100.g107f6fc66597",
     "react-native-nitro-modules": "1.0.0-alpha.nightly.100.g107f6fc66597"
   },
   "devDependencies": {
