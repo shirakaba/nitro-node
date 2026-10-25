@@ -1,7 +1,8 @@
-diff --git a/node_modules/@react-native-windows/cli/lib-commonjs/commands/healthCheck/healthChecks.js b/node_modules/@react-native-windows/cli/lib-commonjs/commands/healthCheck/healthChecks.js
---- a/node_modules/@react-native-windows/cli/lib-commonjs/commands/healthCheck/healthChecks.js
-+++ b/node_modules/@react-native-windows/cli/lib-commonjs/commands/healthCheck/healthChecks.js
-@@ -37,7 +37,7 @@
+diff --git a/lib-commonjs/commands/healthCheck/healthChecks.js b/lib-commonjs/commands/healthCheck/healthChecks.js
+--- a/lib-commonjs/commands/healthCheck/healthChecks.js
++++ b/lib-commonjs/commands/healthCheck/healthChecks.js
+@@ -36,9 +36,9 @@
+ const pathHelpers = __importStar(require("../../utils/pathHelpers"));
  const execa_1 = __importDefault(require("execa"));
  const find_dotnet_tools_1 = require("@react-native-windows/find-dotnet-tools");
  const healthCheckList_1 = require("./healthCheckList");
@@ -10,7 +11,9 @@ diff --git a/node_modules/@react-native-windows/cli/lib-commonjs/commands/health
  function getHealthChecks() {
      // #8471: There are known cases where the dependencies script will error out.
      // Fail gracefully if that happens in the meantime.
-@@ -83,6 +83,7 @@
+     try {
+@@ -82,8 +82,9 @@
+                     isRequired: optional,
                      getDiagnostics: async () => {
                          let needsToBeFixed = true;
                          try {
@@ -18,7 +21,9 @@ diff --git a/node_modules/@react-native-windows/cli/lib-commonjs/commands/health
                              await (0, execa_1.default)(`"${powershell}" -ExecutionPolicy Unrestricted -NoProfile "${rnwDepScriptPath}" -NoPrompt -Check ${id}`);
                              needsToBeFixed = false;
                          }
-@@ -92,6 +93,18 @@
+                         catch { }
+@@ -91,8 +92,20 @@
+                             needsToBeFixed,
                          };
                      },
                      runAutomaticFix: async ({ loader, logManualInstallation }) => {
@@ -37,10 +42,12 @@ diff --git a/node_modules/@react-native-windows/cli/lib-commonjs/commands/health
                          const command = `"${powershell}" -ExecutionPolicy Unrestricted -NoProfile "${rnwDepScriptPath}" -Check ${id}`;
                          try {
                              const { exitCode } = await (0, execa_1.default)(command, { stdio: 'inherit' });
-diff --git a/node_modules/@react-native-windows/cli/lib-commonjs/utils/commandWithProgress.js b/node_modules/@react-native-windows/cli/lib-commonjs/utils/commandWithProgress.js
---- a/node_modules/@react-native-windows/cli/lib-commonjs/utils/commandWithProgress.js
-+++ b/node_modules/@react-native-windows/cli/lib-commonjs/utils/commandWithProgress.js
-@@ -42,8 +42,9 @@
+                             if (exitCode) {
+diff --git a/lib-commonjs/utils/commandWithProgress.js b/lib-commonjs/utils/commandWithProgress.js
+--- a/lib-commonjs/utils/commandWithProgress.js
++++ b/lib-commonjs/utils/commandWithProgress.js
+@@ -41,10 +41,11 @@
+     };
      return (0, ora_1.default)(options).start();
  }
  exports.newSpinner = newSpinner;
@@ -51,3 +58,4 @@ diff --git a/node_modules/@react-native-windows/cli/lib-commonjs/utils/commandWi
      try {
          const printException = verbose ? '$_;' : '';
          const importAppx = useAppxCompatibility
+             ? 'Import-Module Appx -WarningAction SilentlyContinue; '

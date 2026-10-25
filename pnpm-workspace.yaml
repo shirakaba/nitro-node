@@ -18,3 +18,6 @@ minimumReleaseAgeExclude:
   - expo-desktop@1.0.6
 
 nodeLinker: hoisted
+
+patchedDependencies:
+  "@react-native-windows/cli@0.83.2": patches/@react-native-windows/cli@0.83.2.patch

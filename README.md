@@ -39,6 +39,8 @@ Each native workspace uses `"build": "cmake-js compile"` and `"install": "node -
 
 To build only the example module and its workspace dependencies, use `pnpm --filter example-hello-world... build`. The module's CMake project discovers the SDK through its installed `nitro-node` dependency and uses `find_package(NitroNode CONFIG REQUIRED)`.
 
+The Expo Desktop demo needs a native dependency patch for `@react-native-windows/cli@0.83.2` to defer PowerShell discovery until a Windows command needs it. The package-relative patch lives in `patches/@react-native-windows/cli@0.83.2.patch`. The root `package.json` registers it for npm 12+, and `pnpm-workspace.yaml` registers the same file for this repository's pnpm installs. Both apply it during installation; no patching postinstall script is needed. Patch declarations belong at the workspace root, including when copying this demo into another monorepo.
+
 ## Use
 
 ```js

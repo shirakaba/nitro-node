@@ -23,5 +23,8 @@
     ],
     "!(*.{js,jsx,ts,tsx,mjs,cjs,mts,cts})": "oxfmt --write --no-error-on-unmatched-pattern"
   },
-  "packageManager": "pnpm@12.15.0"
+  "packageManager": "pnpm@12.15.0",
+  "patchedDependencies": {
+    "@react-native-windows/cli@0.83.2": "patches/@react-native-windows/cli@0.83.2.patch"
+  }
 }
