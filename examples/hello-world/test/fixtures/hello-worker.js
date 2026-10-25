@@ -3,5 +3,8 @@ import { setImmediate } from "node:timers";
 
 const { jsiHello, HelloWorld } = await import(workerData);
 setImmediate(() => {
+  if (!parentPort) {
+    throw new Error("Expected parentPort to be populated.");
+  }
   parentPort.postMessage([jsiHello("Worker"), new HelloWorld().greet("Worker")]);
 });

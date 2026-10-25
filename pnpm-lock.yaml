@@ -164,6 +164,9 @@ settings:
 
 catalogs:
   default:
+    '@tsconfig/node24':
+      specifier: ^24.0.5
+      version: 24.0.5
     '@types/node':
       specifier: ^24.13.6
       version: 24.19.2
@@ -200,6 +203,12 @@ importers:
         specifier: workspace:*
         version: link:../../packages/nitro-node
     devDependencies:
+      '@tsconfig/node24':
+        specifier: 'catalog:'
+        version: 24.0.5
+      '@types/node':
+        specifier: 'catalog:'
+        version: 24.19.2
       cmake-js:
         specifier: 'catalog:'
         version: 8.0.0(supports-color@8.1.1)
@@ -629,6 +638,9 @@ packages:
 
   '@sinclair/typebox@0.27.12':
     resolution: {integrity: sha512-hhyNJ+nbR6ZR7pToHvllEFun9TL0sbL+tk/ON75lo+Xas054uez98qRbsuNt7MBCyZKK4+8Yli/OAGZhmfBZ/g==}
+
+  '@tsconfig/node24@24.0.5':
+    resolution: {integrity: sha512-DWC54fGPuhZgg3Ighg4Y/A/bA3ZdB5hnzAuv/MkQ/X85sVsBsMQxu8t7khutdYeiNksBbFdDyeqv1HSW2Zl8aA==}
 
   '@types/istanbul-lib-coverage@2.0.6':
     resolution: {integrity: sha512-2QF/t/auWm0lsy8XtKVPG19v3sSOQlJe/YHZgfjb/KBBHOGSV+J2q/S671rcq9uTBrLAXmZpqJiaQbMT+zNU1w==}
@@ -1896,6 +1908,8 @@ snapshots:
       react-native: 0.88.0(@babel/core@7.29.7(supports-color@8.1.1))(react@19.3.1)(supports-color@8.1.1)
 
   '@sinclair/typebox@0.27.12': {}
+
+  '@tsconfig/node24@24.0.5': {}
 
   '@types/istanbul-lib-coverage@2.0.6': {}
 

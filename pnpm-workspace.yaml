@@ -4,6 +4,7 @@ packages:
 
 catalog:
   cmake-js: ^8.0.0
+  "@tsconfig/node24": ^24.0.5
   "@types/node": ^24.13.6
   # Places the npm package `typescript`, which provides `tsc` v7,
   # into node_modules/@typescript/native. We can call this for all typechecking.
